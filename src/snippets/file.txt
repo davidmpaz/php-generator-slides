@@ -1,0 +1,3 @@
+Line one for testing
+Line 2 for testing
+Line 3 fo a very creative sample of txt !

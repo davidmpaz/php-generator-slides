@@ -1,0 +1,21 @@
+{
+  "name": "php-yield-slides",
+  "version": "1.0.0",
+  "description": "Yet another `yield` talk",
+  "main": "index.js",
+  "scripts": {
+    "serve": "revealer --serve",
+    "build": "revealer --build build"
+  },
+  "keywords": [
+    "php",
+    "generators",
+    "slide"
+  ],
+  "author": "David Paz <davidmpaz@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "reveal.js": "^3.5.0",
+    "revealer": "^2.0.4"
+  }
+}

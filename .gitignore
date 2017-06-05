@@ -1,0 +1,5 @@
+.idea/
+node_modules
+build
+src/snippets/cachegrind.*
+src/snippets/trace.*.xt

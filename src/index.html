@@ -1,0 +1,1068 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>PHP Generators</title>
+
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/black.css">
+    <link rel="stylesheet" href="css/custom.css">
+
+    <!-- Theme used for syntax highlighting of code -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
+
+    <!-- Printing and PDF exports -->
+    <script>
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = window.location.search.match(/print-pdf/gi)
+            ? 'css/print/pdf.css'
+            : 'css/print/paper.css';
+        document.getElementsByTagName('head')[0].appendChild(link);
+    </script>
+</head>
+<body>
+<div class="reveal">
+    <div class="slides">
+
+        <section id="intro">
+            <h2>Yet another <i>yield</i> talk</h2>
+
+            <p class="small">David Paz</p>
+            <p>Software Developer <b>@</b>
+                <a href="https://www.intellishop.ag">IntelliShop AG</a>
+            </p>
+        </section>
+
+        <section id="reasons">
+            <h2>Why ?</h2>
+            <h2 class="fragment fade-in">What to check here ?</h2>
+            <ol>
+                <li class="fragment fade-in">Language construct</li>
+                <li class="fragment fade-in">Snippet samples</li>
+                <li class="fragment fade-in">Some benchmarks</li>
+            </ol>
+        </section>
+
+        <section id="syntax-intro">
+
+            <section id="what-are-generators">
+                <h2>What are generators</h2>
+                <p class="fragment fade-in">
+                    ... boilerplate-free way of implementing
+                    <a href="http://php.net/manual/en/generator.rewind.php">iterators
+                        *</a>.
+                </p>
+                <p class="fragment fade-in">... no
+                    <a href="http://php.net/manual/en/class.iterator.php">Iterator</a>
+                    interface implementations.
+                </p>
+                <p class="fragment fade-in">
+                    ... <b>low</b> and constant <b>footprint</b> on memory
+                    usage.
+                </p>
+
+                <aside class="notes">
+                    - According to php.net documentation<br>
+                    - No full iterator.
+                    http://php.net/manual/en/generator.rewind.php<br>
+                    * If iteration has already begun, this will throw an
+                    exception.
+                </aside>
+            </section>
+
+            <section id="another-pov">
+                <blockquote
+                        cite="https://nikic.github.io/2012/12/22/Cooperative-multitasking-using-coroutines-in-PHP.html#generators-as-interruptible-functions">
+                    <b>Generators</b> are interruptible functions, where the
+                    "<b>yield</b>"
+                    statements constitute the interruption points.
+                </blockquote>
+
+                <aside class="notes">
+                    According to creator: Nikita Popov. Another point of view.
+                </aside>
+            </section>
+
+            <section id="how-to-yield">
+                <h2>How to yield</h2>
+                <pre><code class="php">
+function gen_one_to_three() {
+    for ($i = 1; $i <= 3; $i++) {
+        // Note that $i is preserved between yields.
+        yield $i;
+    }
+}
+
+$generator = gen_one_to_three();
+foreach ($generator as $value) {
+    echo "$value\n";
+}</code></pre>
+                <aside class="notes">
+                    <b>yield</b> provides a value to the code looping over the
+                    generator and pauses execution of the
+                    <b>generator function</b>.
+                </aside>
+            </section>
+
+            <section id="understanding">
+                <h2>understanding</h2>
+
+                <pre><code>
+function gen() {
+    echo 'start';
+    yield 'middle';
+    echo 'end';
+}
+
+// Initial call does not output anything
+$gen = gen();
+echo $gen->current();
+$gen->next();
+</code></pre>
+                <aside class="notes">
+                    echo $gen->current();<br>
+                    Call to current() resumes the generator, thus "start" is
+                    echo'd.
+                    Then the yield expression is hit and the string "middle" is
+                    returned
+                    as the result of current() and then echo'd.<br><br>
+
+                    $gen->next();<br>
+                    Execution of the generator is resumed again, echoing "end"
+                </aside>
+            </section>
+
+        </section>
+
+        <section id="syntax-construct">
+
+            <section id="facts">
+                <h2>some facts</h2>
+
+                <ul>
+                    <li>returns internal <a
+                            href="http://php.net/manual/en/class.generator.php">Generator</a>
+                        class.
+                    </li>
+                    <li>execution is postponed... <b>lazy</b>?
+                        <b>Yes</b>!!
+                    </li>
+                    <li>generators can be <i><b>aggregated</b></i>.
+                        <sup>*</sup></li>
+                    <li><b>yield</b> can be seen as <b>return</b>.</li>
+                    <li><b>yield</b> can be in an expression context.
+                    </li>
+                    <li><b>yield</b> supports key/value syntax.</li>
+                </ul>
+
+                <aside class="notes">
+                    <p class="small"><sup>*</sup> Starting on PHP 7.0.</p>
+
+                    <p>This "Generator" object implements the
+                        <a href="http://php.net/manual/en/class.iterator.php">Iterator</a>
+                        interface.
+                    </p>
+                    <p>
+                        Important to note that in PHP7, the function
+                        returns an internal type: Generator,
+                    </p>
+                </aside>
+            </section>
+
+            <section id="facts-code-lazy">
+                <h2>Lazy</h2>
+                <pre><code class="php">
+// lazy evaluation and return type
+$range = xrange(1, 1000000);
+var_dump($range); // object(Generator)#1
+var_dump($range instanceof Iterator); // bool(true)
+</code></pre>
+
+                <aside class="notes">
+                    xrange example from:
+                    http://php.net/manual/en/language.generators.overview.php
+                </aside>
+            </section>
+
+            <section id="facts-code-aggregate">
+                <h2>aggregation</h2>
+
+                <pre><code class="php">
+// aggregation from other generators
+function getEbooks()
+{
+    yield new Ebook();
+    yield from [new Ebook(), new Ebook()];
+    yield from new ArrayIterator([new Ebook(), new Ebook()]);
+    yield from $this->getEbooksFromCSV();
+    yield from $this->getEbooksFromDatabase();
+}
+</code></pre>
+            </section>
+
+            <section id="facts-code-expression">
+                <h2>expressions & key / value</h2>
+
+                <pre><code class="php">
+// expression context, NOTICE the parentheses!
+$data = (yield $value);
+
+// yielding key/value
+...
+yield $id => $fields;
+...
+                        </code></pre>
+            </section>
+
+        </section>
+
+        <section id="snippets">
+
+            <section id="import">
+                <h2>import ?</h2>
+
+                <pre><code class="php">
+function getLines($file) {
+      $f = fopen($file, 'r');
+
+      if (!$f) {
+          throw new Exception();
+      }
+
+      while ($line = fgets($f)) {
+          yield $line;
+      }
+
+      fclose($f);
+}
+
+foreach (getLines("someBigFile.csv") as $line) {
+      doSomethingWithLine($line);
+}
+</code></pre>
+
+            </section>
+
+            <section id="export">
+                <h2>export ?</h2>
+
+                <pre><code class="php">
+function createCSV($file) {
+      $f = fopen($file, 'a');
+      while (true) {
+          $line = yield;
+          fwrite($f, $line);
+      }
+}
+$csv = createCSV($file);
+$csv->send("First");
+$csv->send("Second");
+$csv->send("Third");
+    ...
+    ...
+$csv->send("Billion")
+
+</code></pre>
+
+            </section>
+
+            <section id="threading">
+                <h2>threading ?</h2>
+
+                <p>be sure we have no blocking IO.</p>
+
+                <pre><code class="php">
+function step1() {
+    $f = fopen("file.txt", 'r');
+    while ($line = fgets($f)) {
+        processLine($line);
+        yield true;
+    }
+}
+
+ function step2() {
+    $f = fopen("file2.txt", 'r');
+    while ($line = fgets($f)) {
+        processLine($line);
+        yield true;
+    }
+}
+</code></pre>
+            </section>
+
+            <section id="more-threading">
+                <h2>more threading...</h2>
+
+                <pre><code class="php">
+function step3() {
+     $f = fsockopen("www.example.com", 80);
+     stream_set_blocking($f, false);
+     $headers = "GET / HTTP/1.1\r\n";
+     $headers .= "Host: www.example.com\r\n";
+     $headers .= "Connection: Close\r\n\r\n";
+     fwrite($f, $headers);
+     $body = '';
+     while (!feof($f)) {
+         $body .= fread($f, 8192);
+         yield true;
+     }
+     processBody($body);
+}
+</code></pre>
+
+            </section>
+
+            <section id="runner-threading">
+                <h2>WARNING!! spamming now</h2>
+
+                <pre><code>
+function runner(array $steps) {
+    while (true) {
+        foreach ($steps as $key => $step) {
+            $step->next();
+            if (!$step->valid()) {
+                unset($steps[$key]);
+            }
+        }
+        if (empty($steps)) return;
+    }
+}
+
+runner(array(step1(), step2(), step3()));
+</code></pre>
+
+
+            </section>
+
+            <section id="wanna-more">
+                <h2>wanna more?</h2>
+
+                <p>Check
+                    <a href="https://bitbucket.org/mkjpryor/async/wiki/Home">
+                        this Async library
+                    </a>
+                </p>
+
+                <p>Check <a href="https://github.com/nikic/iter">this other</a>
+                    for overcoming with generators limitations with
+                    <b>array_[*]</b> functions.
+                </p>
+
+                <p>Check references
+                    <a href="http://www.dabeaz.com/generators/">[^2]</a> and
+                    <a href="https://nikic.github.io/2012/12/22/Cooperative-multitasking-using-coroutines-in-PHP.html">[^8]</a>
+                    for OS related stuff.
+                </p>
+
+            </section>
+
+        </section>
+
+        <section id="benchmarking">
+
+            <section id="benchmarking-intro">
+                <h2>Some Benchmarking</h2>
+
+                <p>Profiling was done with PHP 7.0 <br>and xdebug enabled on:
+                </p>
+
+                <pre><code class="bash">
+     Produkt: Intel(R) Core(TM) i5-6600K CPU @ 3.50GHz
+     Beschreibung: Systemspeicher Größe: 7916MiB
+</code></pre>
+            </section>
+
+            <section id="x-range">
+                <h2>range example</h2>
+
+                <span class="table-title"><b>range</b> built in function: range(0, 1000000, 2)</span>
+                <table>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th>Inclusive</th>
+                        <th></th>
+                        <th>Own</th>
+                        <th></th>
+                    </tr>
+                    <tr>
+                        <td>function</td>
+                        <td>#calls</td>
+                        <td>time (ms)</td>
+                        <td>memory (Mib)</td>
+                        <td>time (ms)</td>
+                        <td>memory (Mib)</td>
+                    </tr>
+                    <tr class="green">
+                        <td>range</td>
+                        <td>1</td>
+                        <td>0.0172</td>
+                        <td>33.558608</td>
+                        <td>0.0172</td>
+                        <td>33.558608</td>
+                    </tr>
+                </table>
+
+                <span class="table-title"><b>xrange</b> generators function: xrange(0, 1000000, 2)</span>
+                <table>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th>Inclusive</th>
+                        <th></th>
+                        <th>Own</th>
+                        <th></th>
+                    </tr>
+                    <tr>
+                        <td>function</td>
+                        <td>#calls</td>
+                        <td>time (ms)</td>
+                        <td>memory (Mib)</td>
+                        <td>time (ms)</td>
+                        <td>memory (Mib)</td>
+                    </tr>
+                    <tr>
+                        <td>{main}</td>
+                        <td>1</td>
+                        <td>4.4350</td>
+                        <td>3.2e-5</td>
+                        <td>1.7324</td>
+                        <td>4128</td>
+                    </tr>
+                    <tr class="green">
+                        <td>xrange</td>
+                        <td>500002</td>
+                        <td>2.7025</td>
+                        <td>-0.004096</td>
+                        <td>2.7025</td>
+                        <td>-0.004096</td>
+                    </tr>
+                </table>
+
+            </section>
+
+            <section id="multiple-iteration">
+                <h2>multiple iteration methods</h2>
+
+                <p>
+                    Lets compare how each iteration method performs with
+                    the
+                    <a href="https://gist.github.com/nikic/2975796">microbench.php</a>
+                    gist
+                </p>
+            </section>
+
+            <section id="multiple-iteration-comparison">
+                <table>
+                    <tbody>
+                    <tr>
+                        <td>Method</td>
+                        <td>Iterations</td>
+                        <td>Time (sec)</td>
+                        <td>Memory (Mib)</td>
+                    </tr>
+                    <tr>
+                        <td class="green">xrange</td>
+                        <td class="green">1000000</td>
+                        <td class="green">0.3180730342865</td>
+                        <td class="green">0.000396728515625</td>
+                    </tr>
+                    <tr>
+                        <td>RangeIterator</td>
+                        <td>1000000</td>
+                        <td class="red">1.2232799530029</td>
+                        <td class="green">0.0001220703125</td>
+                    </tr>
+                    <tr>
+                        <td>urange</td>
+                        <td>1000000</td>
+                        <td>0.20832705497742</td>
+                        <td class="red">32.003982543945</td>
+                    </tr>
+                    <tr>
+                        <td>range</td>
+                        <td>1000000</td>
+                        <td>0.036378145217896</td>
+                        <td class="red">32.003982543945</td>
+                    </tr>
+
+                    <tr>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td>xrange</td>
+                        <td>10000</td>
+                        <td>0.0032780170440674</td>
+                        <td>0.0003662109375</td>
+                    </tr>
+                    <tr>
+                        <td>RangeIterator</td>
+                        <td>10000</td>
+                        <td>0.012333154678345</td>
+                        <td>0.0001220703125</td>
+                    </tr>
+                    <tr>
+                        <td>urange</td>
+                        <td>10000</td>
+                        <td>0.00089597702026367</td>
+                        <td>0.50395965576172</td>
+                    </tr>
+                    <tr>
+                        <td>range</td>
+                        <td>10000</td>
+                        <td>0.00047993659973145</td>
+                        <td>0.50395965576172</td>
+                    </tr>
+
+                    <tr>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td>xrange</td>
+                        <td>100</td>
+                        <td>4.1007995605469E-5</td>
+                        <td>0.0003662109375</td>
+                    </tr>
+                    <tr>
+                        <td>RangeIterator</td>
+                        <td>100</td>
+                        <td>0.00018310546875</td>
+                        <td>0.0001220703125</td>
+                    </tr>
+                    <tr>
+                        <td>urange</td>
+                        <td>100</td>
+                        <td>4.4107437133789E-5</td>
+                        <td>0.0078659057617188</td>
+                    </tr>
+                    <tr>
+                        <td>range</td>
+                        <td>100</td>
+                        <td>8.1062316894531E-6</td>
+                        <td>0.0078659057617188</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section id="fetching-db">
+                <h2>Database query</h2>
+                <p>
+                    Results from executing <b>samples/db.php</b>
+                </p>
+                <table>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th>Inclusive</th>
+                        <th></th>
+                        <th>Own</th>
+                        <th></th>
+                    </tr>
+                    <tr>
+                        <td>function</td>
+                        <td>#calls</td>
+                        <td>time (ms)</td>
+                        <td>memory (Mib)</td>
+                        <td>time (ms)</td>
+                        <td>memory (Mib)</td>
+                    </tr>
+                    <tr>
+                        <td class="green">getUsers</td>
+                        <td class="green">1</td>
+                        <td class="green">0.0118</td>
+                        <td class="green">5.007992</td>
+                        <td class="green">0.0118</td>
+                        <td class="green">5.007992</td>
+                    </tr>
+                    <tr>
+                        <td>PDO->query</td>
+                        <td>1</td>
+                        <td>0.0218</td>
+                        <td>1.76616</td>
+                        <td>0.0218</td>
+                        <td>1.76616</td>
+                    </tr>
+                    <tr>
+                        <td>PDO->__construct</td>
+                        <td>1</td>
+                        <td>0.0010</td>
+                        <td>0.010512</td>
+                        <td>0.0010</td>
+                        <td>0.010512</td>
+                    </tr>
+                    <tr>
+                        <td>count</td>
+                        <td>1</td>
+                        <td>0.0000</td>
+                        <td>0</td>
+                        <td>0.0000</td>
+                        <td>0</td>
+                    </tr>
+                    <tr class="green">
+                        <td>{main}</td>
+                        <td>1</td>
+                        <td>0.0358</td>
+                        <td>1.777</td>
+                        <td>0.0012</td>
+                        <td>-5.007664</td>
+                    </tr>
+                </table>
+
+            </section>
+
+            <section id="db-generators">
+                <h2>Database query with generators</h2>
+                <p>
+                    Results from executing <b>samples/db-gen.php</b>
+                </p>
+                <table>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th>Inclusive</th>
+                        <th></th>
+                        <th>Own</th>
+                        <th></th>
+                    </tr>
+                    <tr>
+                        <td>function</td>
+                        <td>#calls</td>
+                        <td>time (ms)</td>
+                        <td>memory (Mib)</td>
+                        <td>time (ms)</td>
+                        <td>memory (Mib)</td>
+                    </tr>
+                    <tr>
+                        <td class="green">getUsers</td>
+                        <td class="green">1000</td>
+                        <td class="green">0.0581</td>
+                        <td class="green">4.475456</td>
+                        <td class="green">0.0581</td>
+                        <td class="green">4.475456</td>
+                    </tr>
+                    <tr>
+                        <td>PDO->query</td>
+                        <td>1</td>
+                        <td>0.0037</td>
+                        <td>1.76616</td>
+                        <td>0.0037</td>
+                        <td>1.76616</td>
+                    </tr>
+                    <tr>
+                        <td>PDO->__construct</td>
+                        <td>1</td>
+                        <td>0.0004</td>
+                        <td>0.010512</td>
+                        <td>0.0004</td>
+                        <td>0.010512</td>
+                    </tr>
+                    <tr class="green">
+                        <td>{main}</td>
+                        <td>1</td>
+                        <td>0.0838</td>
+                        <td>1.777448</td>
+                        <td>0.00217</td>
+                        <td>-4.47468</td>
+                    </tr>
+                </table>
+
+            </section>
+
+            <section id="db-comparison">
+                <h2>Comparing ...</h2>
+                <table>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th>Inclusive</th>
+                        <th></th>
+                        <th>Own</th>
+                        <th></th>
+                    </tr>
+                    <tr>
+                        <td>approach</td>
+                        <td>function</td>
+                        <td>#calls</td>
+                        <td>time (ms)</td>
+                        <td>memory (Mib)</td>
+                        <td>time (ms)</td>
+                        <td>memory (Mib)</td>
+                    </tr>
+                    <tr>
+                        <td>db</td>
+                        <td>getUsers</td>
+                        <td>1</td>
+                        <td class="green">0.0118</td>
+                        <td class="red">5.007992</td>
+                        <td>0.0118</td>
+                        <td>5.007992</td>
+                    </tr>
+                    <tr>
+                        <td>gen</td>
+                        <td>getUsers</td>
+                        <td>1000</td>
+                        <td class="red">0.0581</td>
+                        <td class="green">4.475456</td>
+                        <td>0.0581</td>
+                        <td>4.475456</td>
+                    </tr>
+                </table>
+
+                <p>~5 times slower and ~1 times less memory usage</p>
+
+                <aside class="notes">
+                    Make run with more iterations and profile.
+                </aside>
+            </section>
+
+            <section id="db-comparison-100k">
+                <h2>100k iterations ...</h2>
+                <table>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th>Inclusive</th>
+                        <th></th>
+                        <th>Own</th>
+                        <th></th>
+                    </tr>
+                    <tr>
+                        <td>approach</td>
+                        <td>function</td>
+                        <td>#calls</td>
+                        <td>time (ms)</td>
+                        <td>memory (Mib)</td>
+                        <td>time (ms)</td>
+                        <td>memory (Mib)</td>
+                    </tr>
+                    <tr>
+                        <td>db</td>
+                        <td>getUsers</td>
+                        <td>1</td>
+                        <td class="green"></td>
+                        <td class="red"></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>gen</td>
+                        <td>getUsers</td>
+                        <td>1000</td>
+                        <td class="red"></td>
+                        <td class="green"></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </table>
+
+                <p>X times slower and Y times less memory usage.</p>
+
+                <aside class="notes">
+                    Make run with more iterations and profile.
+                </aside>
+            </section>
+
+            <section id="db-hydrate">
+                <h2>Database query with hydration</h2>
+                <span>Results from executing <b>samples/db-hydrate.php</b></span>
+                <table>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th>Inclusive</th>
+                        <th></th>
+                        <th>Own</th>
+                        <th></th>
+                    </tr>
+                    <tr>
+                        <td>function</td>
+                        <td>#calls</td>
+                        <td>time (ms)</td>
+                        <td>memory (Mib)</td>
+                        <td>time (ms)</td>
+                        <td>memory (Mib)</td>
+                    </tr>
+                    <tr>
+                        <td>getUsers</td>
+                        <td>1</td>
+                        <td>0.0800</td>
+                        <td>5.530832</td>
+                        <td>0.0268</td>
+                        <td>1.248368</td>
+                    </tr>
+                    <tr>
+                        <td>hydrateUser</td>
+                        <td>9999</td>
+                        <td>0.0545</td>
+                        <td>4.282464</td>
+                        <td>0.0545</td>
+                        <td>4.282464</td>
+                    </tr>
+                    <tr>
+                        <td class="green">{main}</td>
+                        <td class="green">1</td>
+                        <td class="green">0.0841</td>
+                        <td class="green">7.307832</td>
+                        <td class="green">0.004</td>
+                        <td class="green">0.000328</td>
+                    </tr>
+                </table>
+            </section>
+
+            <section id="db-generator-hydrate">
+                <h2>Database query with generator hydration</h2>
+                <span>Results from executing <b>samples/db-hydrate-gen.php</b></span>
+                <table>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th>Inclusive</th>
+                        <th></th>
+                        <th>Own</th>
+                        <th></th>
+                    </tr>
+                    <tr>
+                        <td>function</td>
+                        <td>#calls</td>
+                        <td>time (ms)</td>
+                        <td>memory (Mib)</td>
+                        <td>time (ms)</td>
+                        <td>memory (Mib)</td>
+                    </tr>
+                    <tr>
+                        <td>getUsers</td>
+                        <td>10000</td>
+                        <td>0.1288</td>
+                        <td>4.875416</td>
+                        <td>0.0748</td>
+                        <td>0.715832</td>
+                    </tr>
+                    <tr>
+                        <td>hydrateUser</td>
+                        <td>9999</td>
+                        <td>0.0541</td>
+                        <td>4.159584</td>
+                        <td>0.0541</td>
+                        <td>4.159584</td>
+                    </tr>
+                    <tr>
+                        <td class="green">{main}</td>
+                        <td class="green">1</td>
+                        <td class="green">0.1554</td>
+                        <td class="green">1.777488</td>
+                        <td class="green">0.0002</td>
+                        <td class="green">-4.874216</td>
+                    </tr>
+                </table>
+            </section>
+
+            <section id="db-hydrate-comparison">
+                <h2>Comparing ...</h2>
+                <table>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th>Inclusive</th>
+                        <th></th>
+                        <th>Own</th>
+                        <th></th>
+                    </tr>
+                    <tr>
+                        <td>approach</td>
+                        <td>function</td>
+                        <td>#calls</td>
+                        <td>time (ms)</td>
+                        <td>memory (Mib)</td>
+                        <td>time (ms)</td>
+                        <td>memory (Mib)</td>
+                    </tr>
+                    <tr>
+                        <td>db hyd</td>
+                        <td>{main}</td>
+                        <td>1</td>
+                        <td class="green">0.0841</td>
+                        <td class="red">7.307832</td>
+                        <td>0.004</td>
+                        <td>0.000328</td>
+                    </tr>
+                    <tr>
+                        <td>gen hyd</td>
+                        <td>{main}</td>
+                        <td>1</td>
+                        <td class="red">0.1554</td>
+                        <td class="green">1.777488</td>
+                        <td>0.0002</td>
+                        <td>-4.874216</td>
+                    </tr>
+                </table>
+
+                <p>~2 times slower and ~4 times less memory usage</p>
+
+                <table>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th>Inclusive</th>
+                        <th></th>
+                        <th>Own</th>
+                        <th></th>
+                    </tr>
+                    <tr>
+                        <td>approach</td>
+                        <td>function</td>
+                        <td>#calls</td>
+                        <td>time (ms)</td>
+                        <td>memory (Mib)</td>
+                        <td>time (ms)</td>
+                        <td>memory (Mib)</td>
+                    </tr>
+                    <tr>
+                        <td>db hyd</td>
+                        <td>getUsers</td>
+                        <td>1</td>
+                        <td class="green">0.0800</td>
+                        <td class="red">5.530832</td>
+                        <td>0.0268</td>
+                        <td>1.248368</td>
+                    </tr>
+                    <tr>
+                        <td>gen hyd</td>
+                        <td>getUsers</td>
+                        <td>10000</td>
+                        <td class="red">0.1288</td>
+                        <td class="green">4.875416</td>
+                        <td>0.0748</td>
+                        <td>0.715832</td>
+                    </tr>
+                </table>
+
+                <p>~1,5 times slower and ~1 times less memory usage</p>
+
+                <aside class="notes">
+                    Make run with more iterations and profile.
+                </aside>
+            </section>
+
+            <section id="db-hydrate-comparison-100k">
+                <h2>100k iterations ...</h2>
+                <table>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th>Inclusive</th>
+                        <th></th>
+                        <th>Own</th>
+                        <th></th>
+                    </tr>
+                    <tr>
+                        <td>approach</td>
+                        <td>function</td>
+                        <td>#calls</td>
+                        <td>time (ms)</td>
+                        <td>memory (Mib)</td>
+                        <td>time (ms)</td>
+                        <td>memory (Mib)</td>
+                    </tr>
+                    <tr>
+                        <td>db</td>
+                        <td>getUsers</td>
+                        <td>1</td>
+                        <td class="green"></td>
+                        <td class="red"></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>gen</td>
+                        <td>getUsers</td>
+                        <td>1000</td>
+                        <td class="red"></td>
+                        <td class="green"></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </table>
+
+                <p>X times slower and Y times less memory usage.</p>
+
+                <aside class="notes">
+                    Make run with more iterations and profile.
+                </aside>
+            </section>
+
+            <section id="is-hydration">
+                Gather info from profiling IS
+            </section>
+
+        </section>
+
+        <section id="references">
+            <h2>references</h2>
+            <ul>
+                <li>[^1]: <a href="https://wiki.php.net/rfc/generators">https://wiki.php.net/rfc/generators</a></li>
+                <li>[^2]: <a href="http://www.dabeaz.com/generators/">http://www.dabeaz.com/generators/</a></li>
+                <li>[^3]: <a href="http://php.net/manual/en/language.generators.overview.php">http://php.net/manual/en/language.generators.overview.php</a></li>
+                <li>[^4]: <a href="http://php.net/manual/en/language.generators.syntax.php">http://php.net/manual/en/language.generators.syntax.php</a></li>
+                <li>[^5]: <a href="http://php.net/manual/en/language.generators.comparison.php">http://php.net/manual/en/language.generators.comparison.php</a></li>
+                <li>[^6]: <a href="https://gist.github.com/nikic/2975796">https://gist.github.com/nikic/2975796</a></li>
+                <li>[^7]: <a href="http://blog.kevingomez.fr/2016/01/20/use-cases-for-php-generators/">http://blog.kevingomez.fr/2016/01/20/use-cases-for-php-generators/</a></li>
+                <li>[^8]: <a href="https://nikic.github.io/2012/12/22/Cooperative-multitasking-using-coroutines-in-PHP.html">https://nikic.github.io/2012/12/22/Cooperative-multitasking-using-coroutines-in-PHP.html</a></li>
+                <li>[^10]: <a href="http://php.budgegeria.de/trarengbe2">http://php.budgegeria.de/trarengbe2</a></li>
+                <li>[^11]: <a href="http://php.budgegeria.de/trarengbe3">http://php.budgegeria.de/trarengbe3</a></li>
+                <li>[^12]: <a href="http://createopen.com/php/2012/11/27/generators.html">http://createopen.com/php/2012/11/27/generators.html</a></li>
+                <li>[^13]: <a href="https://bitbucket.org/mkjpryor/async/wiki/Home">https://bitbucket.org/mkjpryor/async/wiki/Home</a></li>
+                <li>[^14]: <a href="https://github.com/jasonamyers/php-yield-presentation">https://github.com/jasonamyers/php-yield-presentation</a></li>
+                <li>[^15]: <a href="http://ocramius.github.io/blog/doctrine-orm-optimization-hydration/">http://ocramius.github.io/blog/doctrine-orm-optimization-hydration/</a></li>
+                <li>[^16]: <a href="https://github.com/Ocramius/GeneratedHydrator">https://github.com/Ocramius/GeneratedHydrator</a></li>
+                <li>[^17]: <a href="https://github.com/jasonamyers/php-yield-presentation">https://github.com/jasonamyers/php-yield-presentation</a></li>
+            </ul>
+        </section>
+
+        <section id="thanks">
+            <h2>thanks!!</h2>
+        </section>
+
+    </div>
+</div>
+
+<script src="lib/js/head.min.js"></script>
+<script src="js/reveal.js"></script>
+
+<script>
+    // More info about config & dependencies:
+    // - https://github.com/hakimel/reveal.js#configuration
+    // - https://github.com/hakimel/reveal.js#dependencies
+    Reveal.initialize({
+        dependencies: [
+            {src: 'plugin/markdown/marked.js'},
+            {src: 'plugin/markdown/markdown.js'},
+            {src: 'plugin/notes/notes.js', async: true},
+            {
+                src: 'plugin/highlight/highlight.js',
+                async: true,
+                callback: function () {
+                    hljs.initHighlightingOnLoad();
+                }
+            }
+        ]
+    });
+</script>
+</body>
+</html>

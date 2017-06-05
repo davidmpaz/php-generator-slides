@@ -1,0 +1,25 @@
+section#what-are-generators p,
+section#x-range p,
+section#wanna-more p
+{
+    text-align: left;
+}
+
+section#benchmarking table,
+section#references ul{
+    font-size: 50%;
+}
+
+section#benchmarking .table-title {
+    font-size: medium;
+}
+
+.green {
+    color: forestgreen;
+    border-color: white !important;
+}
+
+.red {
+    color: red;
+    border-color: white !important;
+}

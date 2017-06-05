@@ -1,0 +1,36 @@
+version: "3"
+
+services:
+  php5:
+    container_name: slides-php5
+    build:
+      context: ./docker/php5
+    volumes:
+      - ./src/snippets:/tmp
+    networks:
+      - slides-net
+    links:
+      - db
+  php7:
+    container_name: slides-php7
+    build:
+      context: ./docker/php7
+    volumes:
+      - ./src/snippets:/tmp
+    networks:
+      - slides-net
+    links:
+      - db
+  db:
+    image: mysql:5.6
+    container_name: slides-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: "root"
+    ports:
+      - 3307:3306
+    networks:
+      - slides-net
+
+networks:
+  slides-net:
+    driver: bridge

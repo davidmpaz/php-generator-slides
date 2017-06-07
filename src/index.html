@@ -185,7 +185,9 @@ var_dump($range instanceof Iterator); // bool(true)
 
                 <aside class="notes">
                     xrange example from:
-                    http://php.net/manual/en/language.generators.overview.php
+                    <a href="http://php.net/manual/en/language.generators.overview.php">
+                        language.generators.overview.php
+                    </a>
                 </aside>
             </section>
 
@@ -285,13 +287,14 @@ function step1() {
     }
 }
 
- function step2() {
+function step2() {
     $f = fopen("file2.txt", 'r');
     while ($line = fgets($f)) {
         processLine($line);
         yield true;
     }
 }
+
 </code></pre>
             </section>
 
@@ -559,7 +562,7 @@ runner(array(step1(), step2(), step3()));
             <section id="fetching-db">
                 <h2>Database query</h2>
                 <p>
-                    Results from executing <b>samples/db.php</b>
+                    Results from executing <b>snippets/db.php</b>
                 </p>
                 <table>
                     <tr>
@@ -625,7 +628,7 @@ runner(array(step1(), step2(), step3()));
             <section id="db-generators">
                 <h2>Database query with generators</h2>
                 <p>
-                    Results from executing <b>samples/db-gen.php</b>
+                    Results from executing <b>snippets/db-gen.php</b>
                 </p>
                 <table>
                     <tr>
@@ -730,7 +733,7 @@ runner(array(step1(), step2(), step3()));
 
             <section id="db-hydrate">
                 <h2>Database query with hydration</h2>
-                <span>Results from executing <b>samples/db-hydrate.php</b></span>
+                <span>Results from executing <b>snippets/db-hydrate.php</b></span>
                 <table>
                     <tr>
                         <th></th>
@@ -777,7 +780,7 @@ runner(array(step1(), step2(), step3()));
 
             <section id="db-generator-hydrate">
                 <h2>Database query with generator hydration</h2>
-                <span>Results from executing <b>samples/db-hydrate-gen.php</b></span>
+                <span>Results from executing <b>snippets/db-hydrate-gen.php</b></span>
                 <table>
                     <tr>
                         <th></th>
@@ -952,6 +955,7 @@ runner(array(step1(), step2(), step3()));
 
 <script src="lib/js/head.min.js"></script>
 <script src="js/reveal.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.bundle.js"></script>
 
 <script>
     // More info about config & dependencies:
@@ -1044,6 +1048,44 @@ runner(array(step1(), step2(), step3()));
                 }
             }
         ]
+    });
+
+    var ctx = document.getElementById("myChart");
+    var myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
+            datasets: [{
+                label: '# of Votes',
+                data: [12, 19, 3, 5, 2, 3],
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(255,99,132,1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero:true
+                    }
+                }]
+            }
+        }
     });
 </script>
 </body>

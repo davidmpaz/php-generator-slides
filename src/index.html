@@ -273,6 +273,27 @@ $csv->send("Billion")
 
             </section>
 
+            <section id="cleanup">
+                <h2>Clean up your mess..</h2>
+
+                <p>Avoid leaking... resources offcourse</p>
+
+                <pre><code class="php">
+function getLines($file) {
+    $f = fopen($file, 'r');
+    try {
+        while ($line = fgets($f)) {
+            yield $line;
+        }
+    } finally {
+        fclose($f);
+    }
+}
+
+</code></pre>
+
+            </section>
+
             <section id="threading">
                 <h2>threading ?</h2>
 
@@ -943,6 +964,7 @@ runner(array(step1(), step2(), step3()));
                 <li>[^15]: <a href="http://ocramius.github.io/blog/doctrine-orm-optimization-hydration/">http://ocramius.github.io/blog/doctrine-orm-optimization-hydration/</a></li>
                 <li>[^16]: <a href="https://github.com/Ocramius/GeneratedHydrator">https://github.com/Ocramius/GeneratedHydrator</a></li>
                 <li>[^17]: <a href="https://github.com/jasonamyers/php-yield-presentation">https://github.com/jasonamyers/php-yield-presentation</a></li>
+                <li>[^18]: <a href="https://github.com/davidmpaz/php-generator-slides">this slides</a></li>
             </ul>
         </section>
 

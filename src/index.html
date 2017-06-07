@@ -959,56 +959,12 @@ runner(array(step1(), step2(), step3()));
                 </aside>
             </section>
 
-            <section id="db-hydrate-comparison-100k">
-                <h2>100k iterations ...</h2>
-                <table>
-                    <tr>
-                        <th></th>
-                        <th></th>
-                        <th></th>
-                        <th>Inclusive</th>
-                        <th></th>
-                        <th>Own</th>
-                        <th></th>
-                    </tr>
-                    <tr>
-                        <td>approach</td>
-                        <td>function</td>
-                        <td>#calls</td>
-                        <td>time (ms)</td>
-                        <td>memory (Mib)</td>
-                        <td>time (ms)</td>
-                        <td>memory (Mib)</td>
-                    </tr>
-                    <tr>
-                        <td>db</td>
-                        <td>getUsers</td>
-                        <td>1</td>
-                        <td class="green"></td>
-                        <td class="red"></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td>gen</td>
-                        <td>getUsers</td>
-                        <td>1000</td>
-                        <td class="red"></td>
-                        <td class="green"></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                </table>
-
-                <p>X times slower and Y times less memory usage.</p>
-
-                <aside class="notes">
-                    Make run with more iterations and profile.
-                </aside>
-            </section>
-
             <section id="is-hydration">
-                Gather info from profiling IS
+                <h2>IntelliShop Framework</h2>
+
+                <div id="content-frame">
+                    <canvas id="myChart" width="600" height="400"></canvas>
+                </div>
             </section>
 
         </section>
@@ -1059,6 +1015,80 @@ runner(array(step1(), step2(), step3()));
                 async: true,
                 callback: function () {
                     hljs.initHighlightingOnLoad();
+                }
+            },
+            {
+                src: 'js/Chart.bundle.js',
+                callback: function(){
+                    var ctx = document.getElementById("myChart");
+                    var myChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: ["1620", "3240", "4860", "6840", "8100", "9720", "11340", "12960", "14580", "16.2k", "81k", "162k", "243k"],
+                            datasets: [
+                                {
+                                    label: 'YIELD TIME (S)',
+                                    data: [0.64, 1.54, 2.09, 3.04, 3.58, 5.15, 5.96, 6.82, 6.61, 6.51, 36.6, 47.04, 71.98],
+                                    borderColor: 'rgb(139,0,0)',
+                                    fill: false,
+                                    borderWidth: 2,
+                                    lineTension: 0.1
+                                },
+                                {
+                                    label: 'YIELD MEMORY (Mb)',
+                                    data: [1.44, 1.45, 1.51, 1.55, 1.59, 1.63, 1.67, 1.71, .175, 1.79, 3.34, 5.28, 7.24],
+                                    borderColor: "rgb(0,100,0)",
+                                    fill: false,
+                                    borderWidth: 2,
+                                    lineTension: 0.1
+                                },
+                                {
+                                    label: 'TIME WITHOUT YIELD (S)',
+                                    data: [0.66, 1.53, 1.91, 2.62, 3.51, 4.16, 4.95, 4.67, 5.99, 7.67, 40.1, 40.1, 60.13],
+                                    borderColor: "rgb(32,178,170)",
+                                    fill: false,
+                                    borderWidth: 2,
+                                    lineTension: 0.1
+                                },
+                                {
+                                    label: 'MEMORY WITHOUT YIELD (Mb)',
+                                    data: [7.15, 12.91, 18.67, 24.42, 30.18, 35.94, 41.70, 47.45, 53.21, 58.97, /*229.23, 289.23, 864.9*/],
+                                    borderColor: "rgb(255,69,0)",
+                                    fill: false,
+                                    borderWidth: 2,
+                                    lineTension: 0.1
+                                }
+                            ]
+                        },
+                        options: {
+                            scales: {
+                                yAxes: [{
+                                    ticks: {
+                                        beginAtZero:true
+                                    }
+                                }],
+                                xAxes: [{
+                                    display: true,
+                                    scaleLabel: {
+                                        display: true,
+                                        labelString: '# of Entities processed'
+                                    }
+                                }]
+                            },
+                            pan: {
+                                enabled: true,
+                                mode: 'xy'
+                            },
+                            zoom: {
+                                enabled: true,
+                                mode: 'xy'
+                            },
+                            legend: {
+                                display: true,
+                                position: 'right'
+                            }
+                        }
+                    });
                 }
             }
         ]

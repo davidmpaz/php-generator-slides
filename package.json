@@ -16,6 +16,7 @@
   "license": "MIT",
   "dependencies": {
     "reveal.js": "^3.5.0",
-    "revealer": "^2.0.4"
+    "revealer": "^2.0.4",
+    "chartjs-plugin-zoom": "^0.5.0"
   }
 }

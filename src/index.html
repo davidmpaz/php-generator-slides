@@ -394,9 +394,9 @@ runner(array(step1(), step2(), step3()));
                         <td>function</td>
                         <td>#calls</td>
                         <td>time (ms)</td>
-                        <td>memory (Mib)</td>
+                        <td>memory (Mb)</td>
                         <td>time (ms)</td>
-                        <td>memory (Mib)</td>
+                        <td>memory (Mb)</td>
                     </tr>
                     <tr class="green">
                         <td>range</td>
@@ -422,9 +422,9 @@ runner(array(step1(), step2(), step3()));
                         <td>function</td>
                         <td>#calls</td>
                         <td>time (ms)</td>
-                        <td>memory (Mib)</td>
+                        <td>memory (Mb)</td>
                         <td>time (ms)</td>
-                        <td>memory (Mib)</td>
+                        <td>memory (Mb)</td>
                     </tr>
                     <tr>
                         <td>{main}</td>
@@ -464,7 +464,7 @@ runner(array(step1(), step2(), step3()));
                         <td>Method</td>
                         <td>Iterations</td>
                         <td>Time (sec)</td>
-                        <td>Memory (Mib)</td>
+                        <td>Memory (Mb)</td>
                     </tr>
                     <tr>
                         <td class="green">xrange</td>
@@ -574,9 +574,9 @@ runner(array(step1(), step2(), step3()));
                         <td>function</td>
                         <td>#calls</td>
                         <td>time (ms)</td>
-                        <td>memory (Mib)</td>
+                        <td>memory (Mb)</td>
                         <td>time (ms)</td>
-                        <td>memory (Mib)</td>
+                        <td>memory (Mb)</td>
                     </tr>
                     <tr>
                         <td class="green">getUsers</td>
@@ -640,9 +640,9 @@ runner(array(step1(), step2(), step3()));
                         <td>function</td>
                         <td>#calls</td>
                         <td>time (ms)</td>
-                        <td>memory (Mib)</td>
+                        <td>memory (Mb)</td>
                         <td>time (ms)</td>
-                        <td>memory (Mib)</td>
+                        <td>memory (Mb)</td>
                     </tr>
                     <tr>
                         <td class="green">getUsers</td>
@@ -697,9 +697,9 @@ runner(array(step1(), step2(), step3()));
                         <td>function</td>
                         <td>#calls</td>
                         <td>time (ms)</td>
-                        <td>memory (Mib)</td>
+                        <td>memory (Mb)</td>
                         <td>time (ms)</td>
-                        <td>memory (Mib)</td>
+                        <td>memory (Mb)</td>
                     </tr>
                     <tr>
                         <td>db</td>
@@ -728,54 +728,6 @@ runner(array(step1(), step2(), step3()));
                 </aside>
             </section>
 
-            <section id="db-comparison-100k">
-                <h2>100k iterations ...</h2>
-                <table>
-                    <tr>
-                        <th></th>
-                        <th></th>
-                        <th></th>
-                        <th>Inclusive</th>
-                        <th></th>
-                        <th>Own</th>
-                        <th></th>
-                    </tr>
-                    <tr>
-                        <td>approach</td>
-                        <td>function</td>
-                        <td>#calls</td>
-                        <td>time (ms)</td>
-                        <td>memory (Mib)</td>
-                        <td>time (ms)</td>
-                        <td>memory (Mib)</td>
-                    </tr>
-                    <tr>
-                        <td>db</td>
-                        <td>getUsers</td>
-                        <td>1</td>
-                        <td class="green"></td>
-                        <td class="red"></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td>gen</td>
-                        <td>getUsers</td>
-                        <td>1000</td>
-                        <td class="red"></td>
-                        <td class="green"></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                </table>
-
-                <p>X times slower and Y times less memory usage.</p>
-
-                <aside class="notes">
-                    Make run with more iterations and profile.
-                </aside>
-            </section>
-
             <section id="db-hydrate">
                 <h2>Database query with hydration</h2>
                 <span>Results from executing <b>samples/db-hydrate.php</b></span>
@@ -792,9 +744,9 @@ runner(array(step1(), step2(), step3()));
                         <td>function</td>
                         <td>#calls</td>
                         <td>time (ms)</td>
-                        <td>memory (Mib)</td>
+                        <td>memory (Mb)</td>
                         <td>time (ms)</td>
-                        <td>memory (Mib)</td>
+                        <td>memory (Mb)</td>
                     </tr>
                     <tr>
                         <td>getUsers</td>
@@ -839,9 +791,9 @@ runner(array(step1(), step2(), step3()));
                         <td>function</td>
                         <td>#calls</td>
                         <td>time (ms)</td>
-                        <td>memory (Mib)</td>
+                        <td>memory (Mb)</td>
                         <td>time (ms)</td>
-                        <td>memory (Mib)</td>
+                        <td>memory (Mb)</td>
                     </tr>
                     <tr>
                         <td>getUsers</td>
@@ -887,9 +839,9 @@ runner(array(step1(), step2(), step3()));
                         <td>function</td>
                         <td>#calls</td>
                         <td>time (ms)</td>
-                        <td>memory (Mib)</td>
+                        <td>memory (Mb)</td>
                         <td>time (ms)</td>
-                        <td>memory (Mib)</td>
+                        <td>memory (Mb)</td>
                     </tr>
                     <tr>
                         <td>db hyd</td>
@@ -928,9 +880,9 @@ runner(array(step1(), step2(), step3()));
                         <td>function</td>
                         <td>#calls</td>
                         <td>time (ms)</td>
-                        <td>memory (Mib)</td>
+                        <td>memory (Mb)</td>
                         <td>time (ms)</td>
-                        <td>memory (Mib)</td>
+                        <td>memory (Mb)</td>
                     </tr>
                     <tr>
                         <td>db hyd</td>
